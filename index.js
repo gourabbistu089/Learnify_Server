@@ -20,7 +20,8 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors(
     {
-        origin: ["http://localhost:5173", "https://learnify-01-gourab-bistus-projects.vercel.app"],
+        // origin: ["http://localhost:5173", "https://learnify-01-gourab-bistus-projects.vercel.app"],
+        origin:"*",
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE"],
     }
