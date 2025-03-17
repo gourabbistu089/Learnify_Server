@@ -33,7 +33,7 @@ exports.resetPasswordToken = async (req, res) => {
       { new: true }
     );
     // create url
-    const url = `https://learnify-01.vercel.app/update-password/${token}`;
+    const url = `https://learnify-six-iota.vercel.app/update-password/${token}`;
 
     // send mail containing url
     await mailSender(email, "Reset Password Link ", url);
