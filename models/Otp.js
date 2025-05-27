@@ -23,7 +23,7 @@ const otpSchema = new mongoose.Schema({
     async function sendVerificationEmail(email,otp){
        try {
         const mailResponse = mailSender(email,"Notification from Learnify🚀 ",emailTemplate(otp))
-        console.log("Email Sent successfully ", mailResponse)
+        // console.log("Email Sent successfully ", mailResponse)
        } catch (error) {
         console.log("Error Occured while sending email : ",error)
        } 

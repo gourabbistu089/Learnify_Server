@@ -3,7 +3,8 @@ const Otp = require("../models/Otp.js");
 const otpGenerator = require("otp-generator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { passwordUpdated } = require("../mail/templates/passwordUpdate");
+const { passwordUpdated, } = require("../mail/templates/passwordUpdate");
+const {signupNotificationTemplate} = require("../mail/templates/signupNotification");
 const Profile = require("../models/Profile");
 const mailSender = require("../utils/mailSender");
 
@@ -28,7 +29,7 @@ exports.sendOtp = async (req, res) => {
       lowerCaseAlphabets: false,
       specialChars: false,
     });
-    console.log("Otp Generated : ", otp);
+    // console.log("Otp Generated : ", otp);
 
     // Check Unique Otp or not
     let otpRecord = await Otp.findOne({ otp });
@@ -111,7 +112,7 @@ exports.signup = async (req, res) => {
     const recentOtp = await Otp.findOne({ email })
       .sort({ createdAt: -1 })
       .limit(1);
-    console.log(recentOtp);
+    // console.log(recentOtp);
     // validate otp
 
     if (recentOtp.otp !== otp) {
@@ -142,6 +143,7 @@ exports.signup = async (req, res) => {
       additionalDetails: profileDetails._id,
       image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName} ${lastName}`,
     });
+    mailSender(email, "Learnify Signup Notification", signupNotificationTemplate(user))
     return res.status(200).json({
       success: true,
       message: "User Created Successfully",
@@ -171,7 +173,7 @@ exports.login = async (req, res) => {
     // check user exist or not
     const user = await User.findOne({ email }).populate("additionalDetails");
     if (!user) {
-      return res.status(400).json({
+      return res.status(404).json({
         success: false,
         message: "User not found",
       });
@@ -180,7 +182,7 @@ exports.login = async (req, res) => {
     // check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: "Invalid Password",
       });

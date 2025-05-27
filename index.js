@@ -4,6 +4,8 @@ const userRoutes = require("./routes/User");
 const profileRoutes = require("./routes/Profile");
 const courseRoutes = require("./routes/Course");
 const paymentRoutes = require("./routes/Payments");
+const blogRoutes = require('./routes/Blog');
+
 const databasee = require("./config/database");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
@@ -33,7 +35,7 @@ app.use("/api/v1/auth", userRoutes);
 app.use("/api/v1/profile", profileRoutes);
 app.use("/api/v1/courses", courseRoutes);
 app.use("/api/v1/payments", paymentRoutes);
-
+app.use('/api/v1/blogs', blogRoutes);
 // defalut route
 app.get("/", (req, res) => {
     res.send("Hello World!");
