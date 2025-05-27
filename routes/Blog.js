@@ -47,9 +47,9 @@ router.post('/:id/like', blogController.toggleLike);
 router.post('/:id/comment', blogController.addComment);
 
 // AI-powered features (with additional rate limiting)
-router.post('/ai/generate-ideas', aiRateLimit, blogController.generateBlogIdeas);
-router.post('/ai/generate-content', aiRateLimit, blogController.generateBlogContent);
-router.post('/ai/improve-content', aiRateLimit, blogController.improveContent);
-router.post('/ai/generate-seo', aiRateLimit, blogController.generateSEO);
+// router.post('/ai/generate-ideas', aiRateLimit, blogController.generateBlogIdeas);
+// router.post('/ai/generate-content', aiRateLimit, blogController.generateBlogContent);
+// router.post('/ai/improve-content', aiRateLimit, blogController.improveContent);
+// router.post('/ai/generate-seo', aiRateLimit, blogController.generateSEO);
 
 module.exports = router;

@@ -1,5 +1,5 @@
 const Blog = require("../models/Blog");
-const aiService = require("../services/aiService.js");
+// const aiService = require("../services/aiService.js");
 const slugify = require("slugify");
 const { uploadOnCloudinary } = require("../utils/cloudinary");
 
@@ -370,130 +370,130 @@ const blogController = {
   },
 
   // AI-powered features
-  async generateBlogIdeas(req, res) {
-    try {
-      const { topic, courseTitle, count = 5 } = req.body;
+  // async generateBlogIdeas(req, res) {
+  //   try {
+  //     const { topic, courseTitle, count = 5 } = req.body;
 
-      if (!topic) {
-        return res.status(400).json({
-          success: false,
-          message: "Topic is required",
-        });
-      }
+  //     if (!topic) {
+  //       return res.status(400).json({
+  //         success: false,
+  //         message: "Topic is required",
+  //       });
+  //     }
 
-      const ideas = await aiService.generateBlogIdeas(
-        topic,
-        courseTitle,
-        count
-      );
+  //     const ideas = await aiService.generateBlogIdeas(
+  //       topic,
+  //       courseTitle,
+  //       count
+  //     );
 
-      res.json({
-        success: true,
-        data: ideas,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Error generating blog ideas",
-        error: error.message,
-      });
-    }
-  },
+  //     res.json({
+  //       success: true,
+  //       data: ideas,
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({
+  //       success: false,
+  //       message: "Error generating blog ideas",
+  //       error: error.message,
+  //     });
+  //   }
+  // },
 
-  async generateBlogContent(req, res) {
-    try {
-      const { title, outline, tone = "informative" } = req.body;
+  // async generateBlogContent(req, res) {
+  //   try {
+  //     const { title, outline, tone = "informative" } = req.body;
 
-      if (!title) {
-        return res.status(400).json({
-          success: false,
-          message: "Title is required",
-        });
-      }
+  //     if (!title) {
+  //       return res.status(400).json({
+  //         success: false,
+  //         message: "Title is required",
+  //       });
+  //     }
 
-      let result;
-      try {
-        result = await aiService.generateBlogContent(title, outline, tone);
-      } catch (aiError) {
-        // Fallback to template-based generation
-        result = await aiService.generateFallbackContent(title);
-      }
+  //     let result;
+  //     try {
+  //       result = await aiService.generateBlogContent(title, outline, tone);
+  //     } catch (aiError) {
+  //       // Fallback to template-based generation
+  //       result = await aiService.generateFallbackContent(title);
+  //     }
 
-      res.json({
-        success: true,
-        data: {
-          title,
-          ...result,
-          aiGenerated: true,
-          aiPrompt: `Generate blog content for: ${title}`,
-        },
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Error generating blog content",
-        error: error.message,
-      });
-    }
-  },
+  //     res.json({
+  //       success: true,
+  //       data: {
+  //         title,
+  //         ...result,
+  //         aiGenerated: true,
+  //         aiPrompt: `Generate blog content for: ${title}`,
+  //       },
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({
+  //       success: false,
+  //       message: "Error generating blog content",
+  //       error: error.message,
+  //     });
+  //   }
+  // },
 
-  async improveContent(req, res) {
-    try {
-      const { content, focusArea = "general" } = req.body;
+  // async improveContent(req, res) {
+  //   try {
+  //     const { content, focusArea = "general" } = req.body;
 
-      if (!content) {
-        return res.status(400).json({
-          success: false,
-          message: "Content is required",
-        });
-      }
+  //     if (!content) {
+  //       return res.status(400).json({
+  //         success: false,
+  //         message: "Content is required",
+  //       });
+  //     }
 
-      const improvedContent = await aiService.improveContent(
-        content,
-        focusArea
-      );
+  //     const improvedContent = await aiService.improveContent(
+  //       content,
+  //       focusArea
+  //     );
 
-      res.json({
-        success: true,
-        data: {
-          original: content,
-          improved: improvedContent,
-        },
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Error improving content",
-        error: error.message,
-      });
-    }
-  },
+  //     res.json({
+  //       success: true,
+  //       data: {
+  //         original: content,
+  //         improved: improvedContent,
+  //       },
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({
+  //       success: false,
+  //       message: "Error improving content",
+  //       error: error.message,
+  //     });
+  //   }
+  // },
 
-  async generateSEO(req, res) {
-    try {
-      const { title, content } = req.body;
+  // async generateSEO(req, res) {
+  //   try {
+  //     const { title, content } = req.body;
 
-      if (!title || !content) {
-        return res.status(400).json({
-          success: false,
-          message: "Title and content are required",
-        });
-      }
+  //     if (!title || !content) {
+  //       return res.status(400).json({
+  //         success: false,
+  //         message: "Title and content are required",
+  //       });
+  //     }
 
-      const seoData = await aiService.generateSEOData(title, content);
+  //     const seoData = await aiService.generateSEOData(title, content);
 
-      res.json({
-        success: true,
-        data: seoData,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Error generating SEO data",
-        error: error.message,
-      });
-    }
-  },
+  //     res.json({
+  //       success: true,
+  //       data: seoData,
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({
+  //       success: false,
+  //       message: "Error generating SEO data",
+  //       error: error.message,
+  //     });
+  //   }
+  // },
 };
 
 module.exports = blogController;
