@@ -1,7 +1,7 @@
 const Blog = require("../models/Blog");
 // const aiService = require("../services/aiService.js");
 const slugify = require("slugify");
-const { uploadOnCloudinary } = require("../utils/cloudinary");
+const { uploadOnCloudinary, deleteFromCloudinary } = require("../utils/cloudinary");
 
 const blogController = {
   // Get all blogs with filters and pagination
@@ -164,7 +164,6 @@ const blogController = {
   async updateBlog(req, res) {
     try {
       const { id } = req.params;
-      const updates = req.body;
 
       const blog = await Blog.findById(id);
       if (!blog) {
@@ -175,30 +174,65 @@ const blogController = {
       }
 
       // Check if user owns the blog
-      if (blog.author.toString() !== req.user._id.toString()) {
+      if (blog.author.toString() !== req.user.id.toString()) {
         return res.status(403).json({
           success: false,
           message: "Not authorized to update this blog",
         });
       }
 
-      // Handle tags
-      if (updates.tags) {
-        updates.tags = updates.tags.map((tag) => tag.toLowerCase().trim());
-      }
+      // Get form fields 
+      const {
+        title,
+        content,
+        excerpt,
+        category,
+        tags,
+        status,
+        relatedCourses,
+      } = req.body;
 
-      const updatedBlog = await Blog.findByIdAndUpdate(
-        id,
-        { ...updates, updatedAt: new Date() },
-        { new: true, runValidators: true }
-      ).populate("author", "name email profilePicture");
+      console.log("req.body", req.body);
+
+      const updates = {
+        title ,
+        content,
+        excerpt,
+        category,
+        tags: tags
+          ? JSON.parse(tags).map((tag) => tag.toLowerCase().trim())
+          : [],
+        status,
+        relatedCourses,
+      };
+      console.log("updates", updates);
+
+
+    // hadle image
+    if(req.file){
+      const imgLocalPath = req.file?.path;
+      if (!imgLocalPath) {
+        return res.status(400).json({
+          success: false,
+          message: "Image is required",
+        });
+      }
+      const imgUrl = await uploadOnCloudinary(imgLocalPath);
+      const featuredImage = imgUrl.secure_url;
+      updates.featuredImage = featuredImage
+    }
+        const updatedBlog = await Blog.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true,
+    }).populate("author", "name email profilePicture");
 
       res.json({
         success: true,
-        message: "Blog updated successfully",
+        message: "Blog updated successfully Gourab",
         data: updatedBlog,
       });
     } catch (error) {
+      console.log("error", error);
       res.status(500).json({
         success: false,
         message: "Error updating blog",
@@ -220,13 +254,16 @@ const blogController = {
         });
       }
 
+       // delete image from cloudinary
+       await deleteFromCloudinary(blog.featuredImage);
       // Check if user owns the blog
-      if (blog.author.toString() !== req.user._id.toString()) {
+      if (blog.author.toString() !== req.user.id.toString()) {
         return res.status(403).json({
           success: false,
           message: "Not authorized to delete this blog",
         });
       }
+       
 
       await Blog.findByIdAndDelete(id);
 
@@ -259,7 +296,9 @@ const blogController = {
 
       const total = await Blog.countDocuments(filter);
 
-      res.json({
+      res
+        .status(200)
+        .json({
         success: true,
         data: {
           blogs,
@@ -311,7 +350,7 @@ const blogController = {
 
       res.json({
         success: true,
-        message: existingLike ? "Blog like removed" : "Blog like added",
+        message: existingLike ? "Like removed" : "Like added",
         data: {
           likeCount: blog.likes.length,
           isLiked: !existingLike,

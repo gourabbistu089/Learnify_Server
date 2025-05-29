@@ -49,3 +49,15 @@ exports.uploadOnCloudinary = async (localFilePath) => {
     throw new Error("Cloudinary upload failed"); // Re-throw error to notify caller
   }
 };
+exports.deleteFromCloudinary = async (imageUrl) => {
+  try {
+    const urlParts = imageUrl.split('/');
+    const fileName = urlParts[urlParts.length - 1]; // akqposeucjlne8mgbenx.png
+    const publicId = fileName.split('.')[0]; // akqposeucjlne8mgbenx
+
+    await cloudinary.uploader.destroy(publicId,{invalidate:true});
+    console.log('Image deleted from Cloudinary');
+  } catch (error) {
+    console.error('Failed to delete image:', error);
+  }
+};

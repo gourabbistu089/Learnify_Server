@@ -39,7 +39,7 @@ router.get('/slug/:slug', blogController.getBlogBySlug);
 // Blog CRUD operations
 router.post('/create-blog',upload.single("image") , blogController.createBlog);
 router.get('/my-blogs', blogController.getUserBlogs);
-router.put('/:id',blogController.updateBlog);
+router.put('/:id', upload.single("image"), blogController.updateBlog);
 router.delete('/:id', blogController.deleteBlog);
 
 // Blog interactions
