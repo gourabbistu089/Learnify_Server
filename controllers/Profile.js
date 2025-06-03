@@ -3,7 +3,6 @@ const Profile = require("../models/Profile.js");
 const User = require("../models/User.js");
 const Course = require("../models/Course.js");
 const { uploadOnCloudinary } = require("../utils/cloudinary.js");
-const { data } = require("react-router-dom");
 exports.updateProfile = async (req, res) => {
   try {
     // Destructure fields from the request body
