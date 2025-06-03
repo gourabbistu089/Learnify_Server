@@ -34,6 +34,7 @@ router.get('/', blogController.getAllBlogs);
 
 // Protected routes (require authentication)
 router.use(auth); // Apply authentication middleware to all routes below
+router.get('/get-following-blogs', blogController.getFollowingBlogs);
 router.get('/slug/:slug', blogController.getBlogBySlug);
 
 // Blog CRUD operations

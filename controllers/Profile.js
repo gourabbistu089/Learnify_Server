@@ -3,6 +3,7 @@ const Profile = require("../models/Profile.js");
 const User = require("../models/User.js");
 const Course = require("../models/Course.js");
 const { uploadOnCloudinary } = require("../utils/cloudinary.js");
+const { data } = require("react-router-dom");
 exports.updateProfile = async (req, res) => {
   try {
     // Destructure fields from the request body
@@ -12,6 +13,10 @@ exports.updateProfile = async (req, res) => {
       contactNumber,
       address,
       about = "",
+      github = "",
+      twitter = "",
+      website = "",
+      linkedin = "",
     } = req.body;
 
     // Validate fields
@@ -54,6 +59,10 @@ exports.updateProfile = async (req, res) => {
           contactNumber,
           address,
           about,
+          github,
+          twitter,
+          website,
+          linkedin,
         },
       },
       { new: true } // Return the updated document
@@ -126,6 +135,9 @@ exports.getUserDetails = async (req, res) => {
     // find userdetails
     const userDetails = await User.findOne({ _id: id })
       .populate("additionalDetails")
+      .populate("followers")
+      .populate("following")
+      .populate("blogs")
       .exec();
     // return response
     res.status(200).json({
@@ -438,3 +450,100 @@ exports.getStudentDashboard = async (req, res) => {
     });
   }
 };
+
+//new controllers
+exports.toggleFollow = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const creatorId = req.params.id;
+    // if both are same 
+    if (userId === creatorId) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot follow yourself",
+      });
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    const creator = await User.findById(creatorId);
+    if (!creator) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    // check if user already follows the creator
+    if (user.following.includes(creatorId)) {
+      // remove creator from user's following list
+      await User.findByIdAndUpdate(userId, {
+        $pull : {following: creatorId}
+      });
+      // remove the user from creator's followers list
+      await User.findByIdAndUpdate(creatorId,{
+        $pull : {followers: userId}
+      })
+      const user = await User.findById(userId);
+      return res.status(200).json({
+        success: true,
+        message: "User unfollowed successfully",
+        data: user
+      });
+    } else {
+      // add creator to user's following list
+      await User.findByIdAndUpdate(userId, {
+        $push : {following: creatorId}
+      });
+
+      // add the user to creator's followers list
+      await User.findByIdAndUpdate(creatorId,{
+        $push : {followers: userId}
+      })
+      const user = await User.findById(userId);
+      return res.status(200).json({
+        success: true,
+        message: "User followed successfully",
+        data: user
+        
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Unable to follow/unfollow user",
+    });
+  }
+};
+
+exports.getCreatorDetails = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const creatorId = req.params.id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    const creator = await User.findById(creatorId).populate("additionalDetails").populate("blogs").populate("followers").populate("following").select("-password").select("-courses").select("-courseProgress").exec();
+    if (!creator) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Creator details fetched successfully",
+      data: creator,
+    });
+  } catch (error) {
+    
+  }
+}

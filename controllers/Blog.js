@@ -2,6 +2,7 @@ const Blog = require("../models/Blog");
 // const aiService = require("../services/aiService.js");
 const slugify = require("slugify");
 const { uploadOnCloudinary, deleteFromCloudinary } = require("../utils/cloudinary");
+const User = require("../models/User");
 
 const blogController = {
   // Get all blogs with filters and pagination
@@ -9,7 +10,7 @@ const blogController = {
     try {
       const {
         page = 1,
-        limit = 10,
+        limit = 3,
         category,
         status = "published",
         author,
@@ -22,19 +23,19 @@ const blogController = {
       // Build filter object
       const filter = { status };
 
-      if (category) filter.category = category;
-      if (author) filter.author = author;
-      if (tag) filter.tags = { $in: [tag] };
-      if (search) {
-        filter.$or = [
-          { title: { $regex: search, $options: "i" } },
-          { content: { $regex: search, $options: "i" } },
-          { tags: { $in: [new RegExp(search, "i")] } },
-        ];
-      }
+      // if (category) filter.category = category;
+      // if (author) filter.author = author;
+      // if (tag) filter.tags = { $in: [tag] };
+      // if (search) {
+      //   filter.$or = [
+      //     { title: { $regex: search, $options: "i" } },
+      //     { content: { $regex: search, $options: "i" } },
+      //     { tags: { $in: [new RegExp(search, "i")] } },
+      //   ];
+      // }
 
       // Execute query with pagination
-      const blogs = await Blog.find(filter)
+      const blogs = await Blog.find()
         .populate("author", "firstName lastName email image")
         .populate("relatedCourses", "title thumbnail")
         .sort({ [sortBy]: sortOrder === "desc" ? -1 : 1 })
@@ -42,7 +43,7 @@ const blogController = {
         .skip((page - 1) * limit)
         .lean();
 
-      const total = await Blog.countDocuments(filter);
+      const total = await Blog.countDocuments();
 
       res.json({
         success: true,
@@ -65,7 +66,61 @@ const blogController = {
       });
     }
   },
+  // get only following blogs
+  async getFollowingBlogs(req, res){
+    try {
+      const {
+        page = 1,
+        limit = 15,
+        sortBy = "createdAt",
+        sortOrder = "desc",
+      } = req.query;
+      const userId = req.user.id;
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized",
+        });
+      }
+      
+      // step 1 : Get all followings of the user
+      const users = await User.findById(userId).select("following");
 
+      // step 2 : Get all blogs where author is in the followings array
+      const blogs = await Blog.find({ author: { $in: users.following } })
+        .populate("author", "firstName lastName email image")
+        .populate("relatedCourses", "title thumbnail")
+        .sort({ [sortBy]: sortOrder === "desc" ? -1 : 1 })
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .lean();
+
+      const total = await Blog.countDocuments({ author: { $in: users.following } });
+
+      res.json({
+        success: true,
+        message: "All following blogs fetched successfully",
+        data: {
+          blogs,
+          pagination: {
+            current: page,
+            pages: Math.ceil(total / limit),
+            total,
+            hasNext: page < Math.ceil(total / limit),
+            hasPrev: page > 1,
+          },
+        },
+      });
+
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching blogs",
+        error: error.message,
+      });
+    }
+  },
   // Get single blog by slug
   async getBlogBySlug(req, res) {
     try {
@@ -141,6 +196,11 @@ const blogController = {
         featuredImage,
         status: status || "draft",
         relatedCourses,
+      });
+
+      // get User and add the blog to the user's blog list
+      await User.findByIdAndUpdate(req.user.id, {
+        $push: { blogs: blog._id },
       });
 
       await blog.save();

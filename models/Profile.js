@@ -18,5 +18,21 @@ const profileSchema = new mongoose.Schema({
   about:{
     type:String,
   },
+   github: {
+    type: String,
+    trim: true
+  },
+  twitter: {
+    type: String,
+    trim: true
+  },
+  website: {
+    type: String,
+    trim: true
+  },
+  linkedin: {
+    type: String,
+    trim: true
+  }
 },{timestamps:true});
 module.exports = mongoose.model('Profile',profileSchema);

@@ -11,7 +11,9 @@ const {
   updateUserCourseProgress,
   getUserCourseProgress,
   getInstructorDashboard,
-  getStudentDashboard
+  getStudentDashboard,
+  toggleFollow,
+  getCreatorDetails
 } = require("../controllers/Profile")
 const { sentMessage } = require("../controllers/Message")
 // const { isDemo } = require("../middlewares/demo");
@@ -34,5 +36,9 @@ router.get("/getUserCourseProgress", auth, getUserCourseProgress)
 router.get("/getInstructorDashboard", auth, isInstructor, getInstructorDashboard)
 router.get("/getStudentDashboard", auth, isStudent, getStudentDashboard)
 router.post("/sentMessage", sentMessage)
+
+// new routes
+router.post("/toggleFollow/:id", auth, toggleFollow);
+router.post("/get-creator-details/:id", auth, getCreatorDetails);
 
 module.exports = router;
